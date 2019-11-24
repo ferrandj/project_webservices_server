@@ -15,7 +15,7 @@ CREATE TABLE product (
 CREATE TABLE comment (
   id_comment integer PRIMARY KEY AUTOINCREMENT,
   id_product integer NOT NULL,
-  mark int NOT NULL,
+  mark integer NOT NULL,
   description text,
   CONSTRAINT mark_check CHECK (mark IN (0, 1, 2, 3, 4, 5)),
   FOREIGN KEY (id_product) REFERENCES product (id_product)
@@ -26,8 +26,8 @@ CREATE TABLE user (
   id_user integer PRIMARY KEY AUTOINCREMENT,
   username text NOT NULL,
   password text NOT NULL,
-  type int NOT NULL,
-  borrow_number long NOT NULL DEFAULT 0,
+  type integer NOT NULL,
+  borrow_number integer NOT NULL DEFAULT 0,
   CONSTRAINT type_check CHECK (type IN (0, 1))/*0 = teacher, 1 = student*/
 );
 
@@ -35,7 +35,7 @@ CREATE TABLE borrow (
   id_borrow integer PRIMARY KEY AUTOINCREMENT,
   id_user integer NOT NULL,
   id_product integer NOT NULL,
-  state int NOT NULL,
+  state integer NOT NULL,
   asking_date Date NOT NULL DEFAULT (datetime('now','localtime')),
   borrowing_date Date,
   returning_date Date,
