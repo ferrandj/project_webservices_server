@@ -1,6 +1,8 @@
 package fr.uge.server;
 
+import fr.uge.common.services.IConnectionService;
 import fr.uge.common.services.IProductStorageService;
+import fr.uge.server.services.ConnectionService;
 import fr.uge.server.services.ProductStorageService;
 
 import java.rmi.Naming;
@@ -17,7 +19,9 @@ public class MainServer {
         try {
             LocateRegistry.createRegistry(1099);
             IProductStorageService storageService = new ProductStorageService();
+            IConnectionService connectionService = new ConnectionService();
             Naming.rebind("rmi://localhost:1099/storageService", storageService);
+            Naming.rebind("rmi://localhost:1099/connectionService", connectionService);
         }catch (Exception e) {
             logger.log(Level.SEVERE, "Failure: " + e.getMessage());
         }
