@@ -14,6 +14,32 @@ public class MainServer {
 
     private static final Logger logger = Logger.getLogger(MainServer.class.getName());
 
+        /*private static void showTable(String tableName){
+        System.out.println("________________Debut___________________");
+        try(Connection con = Database.getConnection();
+            Statement stm = con.createStatement())
+        {
+            String constructedRequest = "SELECT * FROM " + tableName;
+            ResultSet res = stm.executeQuery(constructedRequest);
+            while(res.next()){
+                if(tableName.equals("user")) {
+                    System.out.println(res.getLong("id_user") + " " + res.getString("username") + " " + res.getInt("type"));
+                }
+                else if(tableName.equals("borrow")){
+                    System.out.println(res.getLong("id_borrow") + " " + res.getLong("id_user") + " " + res.getLong("id_product") + " " + res.getInt("state"));
+                    System.out.println(res.getString("asking_date"));
+                    System.out.println(res.getString("borrowing_date"));
+                    System.out.println(res.getString("returning_date"));
+                }
+            }
+        }
+        catch (SQLException e) {
+            e.printStackTrace();
+        }
+        System.out.println("________________FIN__________________");
+
+    }*/
+
     public static void main(String[] args) {
         try {
             LocateRegistry.createRegistry(1099);

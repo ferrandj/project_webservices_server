@@ -11,6 +11,6 @@ public class NotifService extends UnicastRemoteObject implements INotifService {
 
     @Override
     public void notifBorrow() throws RemoteException {
-
+        //on verra ça plus tard :)
     }
 }

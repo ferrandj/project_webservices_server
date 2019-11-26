@@ -94,7 +94,7 @@ INSERT INTO product (id_product_type, name, image_url, price) VALUES (4, "Béton
 INSERT INTO comment (id_product, mark, description) VALUES (1, 1, "Trop grand, on dirait que Michmich l'a porté !");
 INSERT INTO comment (id_product, mark) VALUES (3, 4);
 
-INSERT INTO borrow (id_user, id_product, state, asking_date, borrowing_date, returning_date) VALUES (1, 1, 2, datetime("2019-11-02 13:37"), datetime("2019-11-02 13:37"), datetime("2019-11-06 14:37"));
+/* INSERT INTO borrow (id_user, id_product, state, asking_date, borrowing_date, returning_date) VALUES (1, 1, 2, datetime("2019-11-02 13:37"), datetime("2019-11-02 13:37"), datetime("2019-11-06 14:37")); */
 INSERT INTO borrow (id_user, id_product, state, asking_date, borrowing_date) VALUES (3, 3, 1, datetime("2019-11-05 16:37"), datetime("2019-11-05 16:37"));
 INSERT INTO borrow (id_user, id_product, state, asking_date) VALUES (2, 3, 0, datetime("2019-11-06 18:17"));
 

@@ -11,11 +11,13 @@ public class CommentService extends UnicastRemoteObject implements ICommentServi
 
     @Override
     public void addComment(long idUser, long idProduct, int mark) throws RemoteException {
-        //
+        //regarder si il n'y a pas déja un commentaire idUser / idProduct
+        //ajouter dans la database
     }
 
     @Override
     public void addComment(long idUser, long idProduct, int mark, String comment) throws RemoteException {
-
+        //regarder si il n'y a pas déja un commentaire idUser / idProduct
+        //ajouter dans la database
     }
 }
