@@ -1,37 +1,43 @@
 package fr.uge.server.services;
 
 import fr.uge.common.services.IBorrowService;
+import fr.uge.common.services.ICommentService;
 import fr.uge.database.Database;
 
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class BorrowService extends UnicastRemoteObject implements IBorrowService {
+
+    private final static Logger logger = Logger.getLogger(BorrowService.class.getName());
 
     public BorrowService() throws RemoteException {
     }
 
     @Override
     public int borrowProduct(long idUser, long idProduct) throws RemoteException {
-        System.out.println("ENTER BORROWPRODUCT");
         try(Connection con = Database.getConnection();
             Statement stm = con.createStatement())
         {
             //regarder si idUser existe, pareil pour idProduct
             if(!isOnTheDatabase("user", idUser, stm)){
-                throw new IllegalArgumentException("This user does not exist");
+                logger.log(Level.INFO, "This user does not exist");
+                return -1;
             }
-            System.out.println("AFTER FIRST CHECK");
             if(!isOnTheDatabase("product", idProduct, stm)){
-                throw new IllegalArgumentException("This product does not exist");
+                logger.log(Level.INFO, "This product does not exist");
+                return -1;
             }
             //regarder si pas déja de demande de ce duo user / product
             String constructedRequest = "SELECT * FROM borrow WHERE id_product == " + idProduct + " and id_user == " + idUser + " and state != 2";
             ResultSet res = stm.executeQuery(constructedRequest);
             if(res.next()){
-                throw new IllegalStateException("you already ask for this product or you actually borrow it");
+                logger.log(Level.INFO, "You already ask for this product or you actually borrow it");
+                return -1;
             }
             //regarder si le produit est disponible
             constructedRequest = "SELECT * FROM borrow WHERE id_product == " + idProduct + " and state == 1";
@@ -57,34 +63,36 @@ public class BorrowService extends UnicastRemoteObject implements IBorrowService
     }
 
     @Override
-    public void returnProduct(long idUser, long idBorrow) throws RemoteException {
+    public ICommentService returnProduct(long idUser, long idBorrow) throws RemoteException {
         try(Connection con = Database.getConnection();
             Statement stm = con.createStatement())
         {
             //regarder si idUser existe, pareil pour idBorrow
             if(!isOnTheDatabase("user", idUser, stm)){
-                throw new IllegalArgumentException("This user does not exist");
+                logger.log(Level.INFO, "This user does not exist");
+                return null;
             }
             String constructedRequest = "SELECT id_user, id_product FROM borrow WHERE id_borrow == " + idBorrow;
             ResultSet res = stm.executeQuery(constructedRequest);
             if(!res.next()){
-                throw new IllegalArgumentException("This borrow does not exist");
+                logger.log(Level.INFO, "This borrow does not exist");
+                return null;
             }
             long idProduct = res.getLong("id_product");
             //regarder si idUser correspond bien a cet idBorrow
             if(Long.parseLong(res.getString("id_user")) != idUser){
-                throw new IllegalArgumentException("This user dos not match with this borrow");
+                logger.log(Level.INFO, "This user dos not match with this borrow");
+                return null;
             }
             //update date de rendu + update state
             constructedRequest = "UPDATE borrow SET state = 2, returning_date = datetime('now','localtime') WHERE id_borrow == " + idBorrow;
             stm.executeUpdate(constructedRequest);
             //chercher le prochain locataire si il y a une waiting list
-            findNextTenant(idProduct, stm);
-            //Todo NOTIFICATION A CALL ICI
-            //Todo COMMENTAIRE A CALL ICI
+            findNextTenant(idProduct, idUser, idBorrow, stm);
         } catch (SQLException e) {
             e.printStackTrace();
         }
+        return new CommentService();
     }
 
     private boolean isOnTheDatabase(String table, long id, Statement stm) throws SQLException {
@@ -93,17 +101,17 @@ public class BorrowService extends UnicastRemoteObject implements IBorrowService
         return res.next();
     }
 
-    private void findNextTenant(long idProduct, Statement stm) throws SQLException {
-        String constructedRequest = "SELECT id_user, type, borrow_number, borrowing_date FROM borrow INNER JOIN user USING(id_user) WHERE id_product == " + idProduct + " and state == 0";
+    private void findNextTenant(long idProduct, long idUser, long idBorrow, Statement stm) throws SQLException {
+        String constructedRequest = "SELECT id_user, type, borrow_number, asking_date FROM borrow INNER JOIN user USING(id_user) WHERE id_product == " + idProduct + " and state == 0";
         ResultSet res = stm.executeQuery(constructedRequest);
         // Priorité 1.Prof 2.Elève | Nombre d'emprunt moins élevé | date de demande
         ArrayList<ArrayList> userList = new ArrayList<>();
         while(res.next()){
             ArrayList<Object> lst = new ArrayList<>();
-            lst.add(res.getLong("id_borrow"));
+            lst.add(res.getLong("id_user"));
             lst.add(res.getInt("type"));
             lst.add(res.getLong("borrow_number"));
-            lst.add(res.getDate("borrowing_date"));
+            lst.add(res.getString("asking_date"));
             userList.add(lst);
         }
         if (userList.isEmpty()){
@@ -119,21 +127,31 @@ public class BorrowService extends UnicastRemoteObject implements IBorrowService
             }
         }
         long idNextTenant = (long)userList.get(0).get(0);
-        constructedRequest = "UPDATE borrow SET state = 2, returning_date = datetime('now','localtime') WHERE id_borrow == " + idNextTenant;
+        System.out.println("------> ID next tenant : " + idNextTenant);
+        constructedRequest = "UPDATE borrow SET state = 1, borrowing_date = datetime('now','localtime') WHERE id_borrow == " + idNextTenant;
+        stm.executeUpdate(constructedRequest);
+        //add the tuples (id_user / id_borrow) on the notification table
+        constructedRequest = "INSERT INTO notification (id_user, id_borrow) VALUES(" + idUser + ", " + idBorrow + ")";
         stm.executeUpdate(constructedRequest);
     }
 
     private ArrayList<ArrayList> obtainFirstUserAsking(ArrayList<ArrayList> userList) {
+        System.out.println("IN");
         ArrayList oldestUser = userList.get(0);
         for(int i = 1; i < userList.size(); i++){
-            Date objectDate  = (Date)userList.get(i).get(3);
-            Date oldestDate  = (Date)oldestUser.get(3);
-            if(objectDate.getTime() < oldestDate.getTime()){
+            System.out.println("je suis combien de fois ici ?");
+            String objectDate  = (String)userList.get(i).get(3);
+            System.out.println("je crash ici ?");
+            String oldestDate  = (String)oldestUser.get(3);
+            System.out.println(objectDate + " " + oldestDate);
+            if(objectDate.compareTo(oldestDate) < 0) {
                 oldestUser = userList.get(i);
             }
         }
+        System.out.println("MIDDLE");
         ArrayList<ArrayList> finalList = new ArrayList<>();
         finalList.add(oldestUser);
+        System.out.println("OUT");
         return finalList;
     }
 

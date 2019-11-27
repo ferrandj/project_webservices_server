@@ -14,5 +14,5 @@ public interface IBorrowService extends Remote {
      * this function permite to return a product borrowed by the user
      * @throws RemoteException remote exception
      */
-    void returnProduct(long isUser, long idBorrow) throws RemoteException;
+    ICommentService returnProduct(long isUser, long idBorrow) throws RemoteException;
 }
