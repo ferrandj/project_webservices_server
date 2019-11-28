@@ -66,7 +66,7 @@ public class ConnectionService extends UnicastRemoteObject implements IConnectio
     }
 
     private boolean validString(String str){
-        return !str.contains("*") && !str.contains("%") && !str.contains("/") && !str.contains("\\");
+        return str != null && !str.contains("*") && !str.contains("%") && !str.contains("/") && !str.contains("\\");
     }
     private boolean validConnection(long idUser, long uniqueId){
         Long secureKey = users.get(idUser);
