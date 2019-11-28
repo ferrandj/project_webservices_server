@@ -3,8 +3,6 @@ target
 
 *.iml
 
-src/main/resources/database/uge.db
-
 lib/javax.annotation.jar
 
 lib/javax.ejb.jar
