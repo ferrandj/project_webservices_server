@@ -35,7 +35,6 @@ public class MainServer {
             e.printStackTrace();
         }
         System.out.println("________________FIN__________________");
-
     }*/
 
     public static void main(String[] args) {

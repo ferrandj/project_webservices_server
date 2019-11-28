@@ -88,7 +88,7 @@ public class BorrowService extends UnicastRemoteObject implements IBorrowService
             constructedRequest = "UPDATE borrow SET state = 2, returning_date = datetime('now','localtime') WHERE id_borrow == " + idBorrow;
             stm.executeUpdate(constructedRequest);
             //chercher le prochain locataire si il y a une waiting list
-            findNextTenant(idProduct, idUser, idBorrow, stm);
+            findNextTenant(idProduct, stm);
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -101,7 +101,7 @@ public class BorrowService extends UnicastRemoteObject implements IBorrowService
         return res.next();
     }
 
-    private void findNextTenant(long idProduct, long idUser, long idBorrow, Statement stm) throws SQLException {
+    private void findNextTenant(long idProduct, Statement stm) throws SQLException {
         String constructedRequest = "SELECT id_user, type, borrow_number, asking_date FROM borrow INNER JOIN user USING(id_user) WHERE id_product == " + idProduct + " and state == 0";
         ResultSet res = stm.executeQuery(constructedRequest);
         // Priorité 1.Prof 2.Elève | Nombre d'emprunt moins élevé | date de demande
@@ -127,44 +127,42 @@ public class BorrowService extends UnicastRemoteObject implements IBorrowService
             }
         }
         long idNextTenant = (long)userList.get(0).get(0);
-        System.out.println("------> ID next tenant : " + idNextTenant);
         constructedRequest = "UPDATE borrow SET state = 1, borrowing_date = datetime('now','localtime') WHERE id_borrow == " + idNextTenant;
         stm.executeUpdate(constructedRequest);
         //add the tuples (id_user / id_borrow) on the notification table
-        constructedRequest = "INSERT INTO notification (id_user, id_borrow) VALUES(" + idUser + ", " + idBorrow + ")";
+        constructedRequest = "SELECT id_borrow FROM borrow where id_product == " + idProduct + " and id_user == " + idNextTenant;
+        res = stm.executeQuery(constructedRequest);
+        long newBorrow = res.getLong("id_borrow");
+        constructedRequest = "INSERT INTO notification (id_user, id_borrow) VALUES(" + idNextTenant + ", " + newBorrow + ")";
         stm.executeUpdate(constructedRequest);
+
     }
 
     private ArrayList<ArrayList> obtainFirstUserAsking(ArrayList<ArrayList> userList) {
-        System.out.println("IN");
         ArrayList oldestUser = userList.get(0);
         for(int i = 1; i < userList.size(); i++){
-            System.out.println("je suis combien de fois ici ?");
             String objectDate  = (String)userList.get(i).get(3);
-            System.out.println("je crash ici ?");
             String oldestDate  = (String)oldestUser.get(3);
             System.out.println(objectDate + " " + oldestDate);
             if(objectDate.compareTo(oldestDate) < 0) {
                 oldestUser = userList.get(i);
             }
         }
-        System.out.println("MIDDLE");
         ArrayList<ArrayList> finalList = new ArrayList<>();
         finalList.add(oldestUser);
-        System.out.println("OUT");
         return finalList;
     }
 
     private ArrayList<ArrayList> keepLowerBorrow(ArrayList<ArrayList> userList) {
         long min = Long.MAX_VALUE;
         for(ArrayList user : userList){
-            if((long)user.get(2) < min){
+            if(min > (long) user.get(2)){
                 min = (long)user.get(2);
             }
         }
         ArrayList<ArrayList> newList = new ArrayList<>();
         for(ArrayList user : userList){
-            if((long)user.get(2) == min){
+            if(min == (long) user.get(2)){
                 newList.add(user);
             }
         }

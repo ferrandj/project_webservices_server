@@ -10,4 +10,5 @@ public interface INotifService extends Remote {
      * @throws RemoteException remote exception
      */
     List<String> notifBorrow(long idUser) throws RemoteException;
+    void deleteNotif(long idUser) throws RemoteException;
 }
