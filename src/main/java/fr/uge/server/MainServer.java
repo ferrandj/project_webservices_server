@@ -1,12 +1,17 @@
 package fr.uge.server;
 
+import fr.uge.common.services.IBorrowService;
 import fr.uge.common.services.IConnectionService;
+import fr.uge.common.services.IProductStorageService;
+import fr.uge.server.services.BorrowService;
 import fr.uge.server.services.ConnectionService;
+import fr.uge.server.services.ProductStorageService;
 
 import java.net.MalformedURLException;
 import java.rmi.Naming;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -40,8 +45,13 @@ public class MainServer {
     public static void main(String[] args) {
         try {
             LocateRegistry.createRegistry(1099);
-            IConnectionService connectionService = new ConnectionService();
+            ConcurrentHashMap<Long, Long> users = new ConcurrentHashMap<>();
+            IConnectionService connectionService = new ConnectionService(users);
+            IProductStorageService storageService = new ProductStorageService(users);
+            IBorrowService borrowService = new BorrowService(users);
             Naming.rebind("rmi://localhost:1099/connectionService", connectionService);
+            Naming.rebind("rmi://localhost:1099/storageService", storageService);
+            Naming.rebind("rmi://localhost:1099/borrowService", borrowService);
         } catch (RemoteException | MalformedURLException e) {
             logger.log(Level.SEVERE, "Failure: " + e.getMessage());
         }

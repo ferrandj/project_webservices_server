@@ -2,13 +2,14 @@ package fr.uge.common.services;
 
 import fr.uge.common.objects.IProduct;
 import fr.uge.common.objects.IProductType;
+import fr.uge.common.objects.IUser;
 
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.util.List;
 
 public interface IProductStorageService extends Remote {
-    boolean addProduct(long idProductType, String name, String image_url) throws RemoteException;
-    List<IProduct> getProducts(String request, long idProductType) throws RemoteException;
-    List<IProductType> getProductTypes() throws RemoteException;
+    boolean addProduct(IUser user, long idProductType, String name, String image_url) throws RemoteException;
+    List<IProduct> getProducts(IUser user, String request, long idProductType) throws RemoteException;
+    List<IProductType> getProductTypes(IUser user) throws RemoteException;
 }

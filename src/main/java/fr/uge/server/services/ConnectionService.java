@@ -12,8 +12,8 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.HashMap;
 import java.util.Random;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -21,10 +21,10 @@ public class ConnectionService extends UnicastRemoteObject implements IConnectio
 
     private final static Logger logger = Logger.getLogger(ConnectionService.class.getName());
 
-    private final HashMap<Long, Long> users = new HashMap<>();
-    private final IProductStorageService storageService = new ProductStorageService();
+    private final ConcurrentHashMap<Long, Long> users;
 
-    public ConnectionService() throws RemoteException {
+    public ConnectionService(ConcurrentHashMap<Long, Long> users) throws RemoteException {
+        this.users = users;
     }
 
     @Override
@@ -57,19 +57,8 @@ public class ConnectionService extends UnicastRemoteObject implements IConnectio
     public boolean logout(IUser user) throws RemoteException {
         return users.remove(user.getIdUser(), user.getUniqueId());
     }
-    @Override
-    public IProductStorageService getStorageService(long idUser, long uniqueId) throws RemoteException {
-        if(validConnection(idUser, uniqueId)){
-            return storageService;
-        }
-        return null;
-    }
 
     private boolean validString(String str){
         return str != null && !str.contains("*") && !str.contains("%") && !str.contains("/") && !str.contains("\\");
-    }
-    private boolean validConnection(long idUser, long uniqueId){
-        Long secureKey = users.get(idUser);
-        return secureKey != null && secureKey == uniqueId;
     }
 }
