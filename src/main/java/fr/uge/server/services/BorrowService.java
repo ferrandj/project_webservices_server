@@ -133,12 +133,13 @@ public class BorrowService extends UnicastRemoteObject implements IBorrowService
         return res.next();
     }
     private void findNextTenant(long idProduct, Statement stm) throws SQLException {
-        String constructedRequest = "SELECT id_user, type, borrow_number, asking_date FROM borrow INNER JOIN user USING(id_user) WHERE id_product == " + idProduct + " and state == 0";
+        String constructedRequest = "SELECT id_borrow, id_user, type, borrow_number, asking_date FROM borrow INNER JOIN user USING(id_user) WHERE id_product == " + idProduct + " AND state == 0";
         ResultSet res = stm.executeQuery(constructedRequest);
         // Priorité 1.Prof 2.Elève | Nombre d'emprunt moins élevé | date de demande
         ArrayList<ArrayList> userList = new ArrayList<>();
         while(res.next()){
             ArrayList<Object> lst = new ArrayList<>();
+            lst.add(res.getLong("id_borrow"));
             lst.add(res.getLong("id_user"));
             lst.add(res.getInt("type"));
             lst.add(res.getLong("borrow_number"));
@@ -157,22 +158,20 @@ public class BorrowService extends UnicastRemoteObject implements IBorrowService
                 }
             }
         }
-        long idNextTenant = (long)userList.get(0).get(0);
-        constructedRequest = "UPDATE borrow SET state = 1, borrowing_date = datetime('now','localtime') WHERE id_borrow == " + idNextTenant;
+        long idBorrow = (long)userList.get(0).get(0);
+        long idNextTenant = (long)userList.get(0).get(1);
+        constructedRequest = "UPDATE borrow SET state = 1, borrowing_date = datetime('now','localtime') WHERE id_user == " + idNextTenant + " AND id_borrow == " + idBorrow;
         stm.executeUpdate(constructedRequest);
         //add the tuples (id_user / id_borrow) on the notification table
-        constructedRequest = "SELECT id_borrow FROM borrow where id_product == " + idProduct + " and id_user == " + idNextTenant;
-        res = stm.executeQuery(constructedRequest);
-        long newBorrow = res.getLong("id_borrow");
-        constructedRequest = "INSERT INTO notification (id_user, id_borrow) VALUES(" + idNextTenant + ", " + newBorrow + ")";
+        constructedRequest = "INSERT INTO notification (id_user, id_borrow) VALUES(" + idNextTenant + ", " + idBorrow + ")";
         stm.executeUpdate(constructedRequest);
 
     }
     private ArrayList<ArrayList> obtainFirstUserAsking(ArrayList<ArrayList> userList) {
         ArrayList oldestUser = userList.get(0);
         for(int i = 1; i < userList.size(); i++){
-            String objectDate  = (String)userList.get(i).get(3);
-            String oldestDate  = (String)oldestUser.get(3);
+            String objectDate  = (String)userList.get(i).get(4);
+            String oldestDate  = (String)oldestUser.get(4);
             System.out.println(objectDate + " " + oldestDate);
             if(objectDate.compareTo(oldestDate) < 0) {
                 oldestUser = userList.get(i);
@@ -185,13 +184,13 @@ public class BorrowService extends UnicastRemoteObject implements IBorrowService
     private ArrayList<ArrayList> keepLowerBorrow(ArrayList<ArrayList> userList) {
         long min = Long.MAX_VALUE;
         for(ArrayList user : userList){
-            if(min > (long) user.get(2)){
-                min = (long)user.get(2);
+            if(min > (long) user.get(3)){
+                min = (long)user.get(3);
             }
         }
         ArrayList<ArrayList> newList = new ArrayList<>();
         for(ArrayList user : userList){
-            if(min == (long) user.get(2)){
+            if(min == (long) user.get(3)){
                 newList.add(user);
             }
         }
@@ -200,7 +199,7 @@ public class BorrowService extends UnicastRemoteObject implements IBorrowService
     private ArrayList<ArrayList> keepTeacherOrReturn(ArrayList<ArrayList> userList){
         ArrayList<ArrayList> teacherList = new ArrayList<>();
         for (ArrayList user : userList){
-            if((int)user.get(1) == 0){
+            if((int)user.get(2) == 0){
                 teacherList.add(user);
             }
         }

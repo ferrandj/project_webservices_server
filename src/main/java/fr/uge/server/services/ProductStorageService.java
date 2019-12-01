@@ -67,6 +67,25 @@ public class ProductStorageService extends UnicastRemoteObject implements IProdu
         return lst;
     }
     @Override
+    public IProduct getProduct(IUser user, long id_product) throws RemoteException {
+        IProduct product = null;
+        if(isUserAuthenticated(user)){
+            if(validId(id_product)) {
+                try (Connection con = Database.getConnection();
+                     Statement stm = con.createStatement()) {
+                    String constructedRequest = "SELECT * FROM product WHERE id_product = " + id_product;
+                    ResultSet res = stm.executeQuery(constructedRequest);
+                    if (res.next()) {
+                        product = new Product(res.getLong("id_product"), res.getLong("id_product_type"), res.getString("name"), res.getString("image_url"));
+                    }
+                } catch (SQLException e) {
+                    logger.log(Level.INFO, e.getMessage());
+                }
+            }
+        }
+        return product;
+    }
+    @Override
     public List<IProductType> getProductTypes(IUser user) throws RemoteException {
         ArrayList<IProductType> lst = new ArrayList<>();
         if(isUserAuthenticated(user)){

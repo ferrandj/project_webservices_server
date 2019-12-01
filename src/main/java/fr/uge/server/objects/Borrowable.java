@@ -29,17 +29,34 @@ public class Borrowable extends UnicastRemoteObject implements IBorrowable {
 
     @Override
     public String getFormattedBorrowable() throws RemoteException {
-        StringBuilder stringBuilder = new StringBuilder("Produit: ");
-        stringBuilder.append(name).append("   Status: ");
+        String tmp1 = padRight("Produit: " + name);
+        String tmp2;
         if(state == 0){
-            stringBuilder.append("En attente depuis le ").append(asking_date);
+            tmp2 = "Status: En attente depuis le " + asking_date;
         }
         else if(state == 1){
-            stringBuilder.append("Em cours d'emprunt depuis le ").append(borrowing_date);
+            tmp2 = "Status: En cours d'emprunt depuis le " + borrowing_date;
         }
         else{
-            stringBuilder.append("Rendu le ").append(returning_date);
+            tmp2 = "Status: Rendu le " + returning_date;
         }
-        return stringBuilder.toString();
+        tmp2 = padRight(tmp2);
+        return tmp1 + tmp2;
+    }
+    @Override
+    public long getBorrowId() throws RemoteException {
+        return id_borrow;
+    }
+    @Override
+    public long getProductId() throws RemoteException {
+        return id_product;
+    }
+    @Override
+    public long getState() {
+        return state;
+    }
+
+    private String padRight(String s) {
+        return String.format("%-" + 100 + "s", s);
     }
 }

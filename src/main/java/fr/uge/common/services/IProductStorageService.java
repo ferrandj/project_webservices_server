@@ -11,5 +11,6 @@ import java.util.List;
 public interface IProductStorageService extends Remote {
     boolean addProduct(IUser user, long idProductType, String name, String image_url) throws RemoteException;
     List<IProduct> getProducts(IUser user, String request, long idProductType) throws RemoteException;
+    IProduct getProduct(IUser user, long id_product) throws RemoteException;
     List<IProductType> getProductTypes(IUser user) throws RemoteException;
 }
