@@ -76,9 +76,9 @@ public class ProductStorageService extends UnicastRemoteObject implements IProdu
                 String constructedRequest = "SELECT * FROM product_type";
                 ResultSet res = stm.executeQuery(constructedRequest);
                 while(res.next()) {
-                    ProductType productType = new ProductType(res.getLong("id_product_type"), res.getString("name"));
-                    lst.add(productType);
-                }
+                ProductType productType = new ProductType(res.getLong("id_product_type"), res.getString("name"));
+                lst.add(productType);
+            }
             } catch (SQLException e) {
                 logger.log(Level.INFO, e.getMessage());
             }

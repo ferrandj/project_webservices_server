@@ -1,10 +1,13 @@
 package fr.uge.server.services;
 
+import fr.uge.common.objects.IBorrowable;
 import fr.uge.common.objects.IProduct;
 import fr.uge.common.objects.IUser;
 import fr.uge.common.services.IBorrowService;
 import fr.uge.common.services.ICommentService;
+import fr.uge.common.services.IProductStorageService;
 import fr.uge.database.Database;
+import fr.uge.server.objects.Borrowable;
 import fr.uge.server.objects.Product;
 import fr.uge.server.objects.ProductType;
 
@@ -16,6 +19,7 @@ import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 public class BorrowService extends UnicastRemoteObject implements IBorrowService {
 
@@ -28,7 +32,7 @@ public class BorrowService extends UnicastRemoteObject implements IBorrowService
     }
 
     @Override
-    public int borrowProduct(IUser user, long idUser, long idProduct) throws RemoteException {
+    public int borrowProduct(IUser user, long idUser, long idProduct, String name) throws RemoteException {
         if(isUserAuthenticated(user)) {
             try (Connection con = Database.getConnection();
                  Statement stm = con.createStatement()) {
@@ -53,12 +57,12 @@ public class BorrowService extends UnicastRemoteObject implements IBorrowService
                 res = stm.executeQuery(constructedRequest);
                 if (res.next()) {
                     // si indisponible -> waiting list
-                    constructedRequest = "INSERT INTO borrow (id_user, id_product, state) VALUES(" + idUser + ", '" + idProduct + "', '" + 0 + "')";
+                    constructedRequest = "INSERT INTO borrow (id_user, id_product, name, state) VALUES(" + idUser + ", " + idProduct + ", '" + name + "', " + 0 + ")";
                     stm.executeUpdate(constructedRequest);
                     return 0;
                 }
                 //si disponible --> borrow
-                constructedRequest = "INSERT INTO borrow (id_user, id_product, state, borrowing_date) VALUES(" + idUser + ", '" + idProduct + "', '" + 1 + "', datetime('now','localtime'))";
+                constructedRequest = "INSERT INTO borrow (id_user, id_product, name, state, borrowing_date) VALUES(" + idUser + ", " + idProduct + ", '" + name + "', " + 1 + ", datetime('now','localtime'))";
                 stm.executeUpdate(constructedRequest);
                 //augmenter le nombre d'emprunt de l'user
                 constructedRequest = "UPDATE user SET borrow_number = borrow_number + 1 WHERE id_user == " + idUser;
@@ -106,22 +110,21 @@ public class BorrowService extends UnicastRemoteObject implements IBorrowService
         return null;
     }
     @Override
-    public List<IProduct> getBorrowedProducts(IUser user, String name) throws RemoteException {
-        ArrayList<IProduct> products = new ArrayList<>();
+    public List<IBorrowable> getBorrowedProducts(IUser user, String name) throws RemoteException {
+        ArrayList<IBorrowable> borrowedProducts = new ArrayList<>();
         if (isUserAuthenticated(user)) {
             try (Connection con = Database.getConnection();
                  Statement stm = con.createStatement()) {
-                String constructedRequest = "SELECT * FROM borrow WHERE id_user == " + user.getIdUser();
+                String constructedRequest = "SELECT * FROM borrow WHERE id_user == " + user.getIdUser() + " AND name LIKE '%" + name + "%'" ;
                 ResultSet res = stm.executeQuery(constructedRequest);
-                while(res.next()) {
-                    Product product = new Product(res.getLong("id_product"), res.getLong("id_product_type"), res.getString("name"), res.getString("image_url"));
-                    products.add(product);
+                while (res.next()){
+                    borrowedProducts.add(new Borrowable(res.getLong("id_borrow"), res.getLong("id_user"), res.getLong("id_product"), res.getString("name"), res.getLong("state"), res.getString("asking_date"), res.getString("borrowing_date"), res.getString("returning_date")));
                 }
             } catch (SQLException e) {
                 e.printStackTrace();
             }
         }
-        return products;
+        return borrowedProducts;
     }
 
     private boolean isOnTheDatabase(String table, long id, Statement stm) throws SQLException {

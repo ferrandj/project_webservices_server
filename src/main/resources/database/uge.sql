@@ -46,6 +46,7 @@ CREATE TABLE borrow
     id_borrow      integer PRIMARY KEY AUTOINCREMENT,
     id_user        integer NOT NULL,
     id_product     integer NOT NULL,
+    name           text    NOT NULL,
     state          integer NOT NULL,
     asking_date    Date    NOT NULL DEFAULT (datetime('now', 'localtime')),
     borrowing_date Date,
@@ -121,11 +122,11 @@ INSERT INTO product (id_product_type, name, image_url, price) VALUES (3, "Zelda"
 INSERT INTO product (id_product_type, name, image_url, price) VALUES (2, "The Witcher tome 1", "https://images-na.ssl-images-amazon.com/images/I/51gbaCE0GPL._SX307_BO1,204,203,200_.jpg", 20);
 INSERT INTO product (id_product_type, name, image_url, price) VALUES (4, "Bétonnière", "https://www.pointp.fr/asset/30/58/AST2243058-XL.jpg", 150);
 
-INSERT INTO borrow (id_user, id_product, state, asking_date, borrowing_date) VALUES (1, 1, 1, datetime("2019-11-05 16:37"), datetime("2019-11-05 16:37"));
-INSERT INTO borrow (id_user, id_product, state, asking_date) VALUES (1, 4, 0, datetime("2019-11-05 16:39"));
-INSERT INTO borrow (id_user, id_product, state, asking_date, borrowing_date) VALUES (3, 3, 1, datetime("2019-11-05 16:37"), datetime("2019-11-05 16:37"));
-INSERT INTO borrow (id_user, id_product, state, asking_date) VALUES (2, 3, 0, datetime("2019-11-06 18:17"));
-INSERT INTO borrow (id_user, id_product, state, asking_date, borrowing_date) VALUES (2, 4, 1, datetime("2019-11-02 11:44"), datetime("2019-11-02 11:44"));
+INSERT INTO borrow (id_user, id_product, name, state, asking_date, borrowing_date) VALUES (1, 1, "T-shirt Star Wars", 1, datetime("2019-11-05 16:37"), datetime("2019-11-05 16:37"));
+INSERT INTO borrow (id_user, id_product, name, state, asking_date) VALUES (1, 4, "Zelda", 0, datetime("2019-11-05 16:39"));
+INSERT INTO borrow (id_user, id_product, name, state, asking_date, borrowing_date) VALUES (3, 3, "T-shirt LOTR", 1, datetime("2019-11-05 16:37"), datetime("2019-11-05 16:37"));
+INSERT INTO borrow (id_user, id_product, name, state, asking_date) VALUES (2, 3,"T-shirt LOTR", 0, datetime("2019-11-06 18:17"));
+INSERT INTO borrow (id_user, id_product, name, state, asking_date, borrowing_date) VALUES (2, 4, "Zelda", 1, datetime("2019-11-02 11:44"), datetime("2019-11-02 11:44"));
 
 
 INSERT INTO customer (username, password) VALUES ("jeremy", "jeremy");

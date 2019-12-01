@@ -1,6 +1,6 @@
 package fr.uge.common.services;
 
-import fr.uge.common.objects.IProduct;
+import fr.uge.common.objects.IBorrowable;
 import fr.uge.common.objects.IUser;
 
 import java.rmi.Remote;
@@ -13,11 +13,11 @@ public interface IBorrowService extends Remote {
      * @return 1 if avaible | 0 if waintingList
      * @throws RemoteException remote exception
      */
-    int borrowProduct(IUser user, long idUser, long idProduct) throws RemoteException;
+    int borrowProduct(IUser user, long idUser, long idProduct, String name) throws RemoteException;
     /**
      * this function permite to return a product borrowed by the user
      * @throws RemoteException remote exception
      */
     ICommentService returnProduct(IUser user, long isUser, long idBorrow) throws RemoteException;
-    List<IProduct> getBorrowedProducts(IUser user, String name) throws RemoteException;
+    List<IBorrowable> getBorrowedProducts(IUser user, String name) throws RemoteException;
 }
