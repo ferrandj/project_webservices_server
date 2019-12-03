@@ -21,6 +21,7 @@ CREATE TABLE comment
     id_comment   integer PRIMARY KEY AUTOINCREMENT,
     id_product   integer NOT NULL,
     id_user      integer NOT NULL,
+    username     text    NOT NULL,
     mark         int     NOT NULL,
     description  text,
     comment_date date    NOT NULL DEFAULT (datetime('now', 'localtime')),
@@ -112,8 +113,10 @@ INSERT INTO product_type (name) VALUES ("Jeu vidéo");
 INSERT INTO product_type (name) VALUES ("Outil");
 INSERT INTO product_type (name) VALUES ("Autre");
 
-INSERT INTO comment (id_product, id_user, mark, description) VALUES (1, 1, 1, "Trop grand, on dirait que Michmich l'a porté !");
-INSERT INTO comment (id_product, id_user, mark) VALUES (3, 2, 4);
+INSERT INTO comment (id_product, id_user, username, mark, description) VALUES (1, 1, "jojo", 1, "Trop grand, on dirait que Michmich l'a porté !");
+INSERT INTO comment (id_product, id_user, username, mark) VALUES (1, 2, "jerem", 3);
+INSERT INTO comment (id_product, id_user, username, mark, description) VALUES (1, 3, "michel", 5, "Parfait pour moi. 20/20 !");
+INSERT INTO comment (id_product, id_user, username, mark) VALUES (3, 2, "jerem", 4);
 
 INSERT INTO product (id_product_type, name, image_url, price) VALUES (1, "T-shirt Star Wars", "https://images-na.ssl-images-amazon.com/images/I/61IpbkO3V8L._UX385_.jpg", 15);
 INSERT INTO product (id_product_type, name, image_url, price) VALUES (1, "T-shirt mon petit poney", "https://images-na.ssl-images-amazon.com/images/I/911-HNyyETL._UX342_.jpg", 25);

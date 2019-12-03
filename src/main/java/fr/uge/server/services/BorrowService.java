@@ -25,7 +25,6 @@ public class BorrowService extends UnicastRemoteObject implements IBorrowService
 
     private final static Logger logger = Logger.getLogger(BorrowService.class.getName());
     private final ConcurrentHashMap<Long, Long> users;
-    private final ICommentService commentService = new CommentService();
 
     public BorrowService(ConcurrentHashMap<Long, Long> users) throws RemoteException {
         this.users = users;
@@ -76,26 +75,23 @@ public class BorrowService extends UnicastRemoteObject implements IBorrowService
 
     }
     @Override
-    public ICommentService returnProduct(IUser user, long idUser, long idBorrow) throws RemoteException {
+    public void returnProduct(IUser user, long idUser, long idBorrow) throws RemoteException {
         if(isUserAuthenticated(user)) {
             try (Connection con = Database.getConnection();
                  Statement stm = con.createStatement()) {
                 //regarder si idUser existe, pareil pour idBorrow
                 if (!isOnTheDatabase("user", idUser, stm)) {
                     logger.log(Level.INFO, "This user does not exist");
-                    return null;
                 }
                 String constructedRequest = "SELECT id_user, id_product FROM borrow WHERE id_borrow == " + idBorrow;
                 ResultSet res = stm.executeQuery(constructedRequest);
                 if (!res.next()) {
                     logger.log(Level.INFO, "This borrow does not exist");
-                    return null;
                 }
                 long idProduct = res.getLong("id_product");
                 //regarder si idUser correspond bien a cet idBorrow
                 if (Long.parseLong(res.getString("id_user")) != idUser) {
                     logger.log(Level.INFO, "This user dos not match with this borrow");
-                    return null;
                 }
                 //update date de rendu + update state
                 constructedRequest = "UPDATE borrow SET state = 2, returning_date = datetime('now','localtime') WHERE id_borrow == " + idBorrow;
@@ -105,9 +101,7 @@ public class BorrowService extends UnicastRemoteObject implements IBorrowService
             } catch (SQLException e) {
                 e.printStackTrace();
             }
-            return commentService;
         }
-        return null;
     }
     @Override
     public List<IBorrowable> getBorrowedProducts(IUser user, String name) throws RemoteException {

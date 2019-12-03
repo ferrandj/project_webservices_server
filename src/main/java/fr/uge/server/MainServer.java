@@ -1,9 +1,11 @@
 package fr.uge.server;
 
 import fr.uge.common.services.IBorrowService;
+import fr.uge.common.services.ICommentService;
 import fr.uge.common.services.IConnectionService;
 import fr.uge.common.services.IProductStorageService;
 import fr.uge.server.services.BorrowService;
+import fr.uge.server.services.CommentService;
 import fr.uge.server.services.ConnectionService;
 import fr.uge.server.services.ProductStorageService;
 
@@ -49,9 +51,11 @@ public class MainServer {
             IConnectionService connectionService = new ConnectionService(users);
             IProductStorageService storageService = new ProductStorageService(users);
             IBorrowService borrowService = new BorrowService(users);
+            ICommentService commentService =  new CommentService(users);
             Naming.rebind("rmi://localhost:1099/connectionService", connectionService);
             Naming.rebind("rmi://localhost:1099/storageService", storageService);
             Naming.rebind("rmi://localhost:1099/borrowService", borrowService);
+            Naming.rebind("rmi://localhost:1099/commentService", commentService);
         } catch (RemoteException | MalformedURLException e) {
             logger.log(Level.SEVERE, "Failure: " + e.getMessage());
         }
