@@ -8,4 +8,6 @@ public interface IProduct extends Remote {
     public long getIdProductType() throws RemoteException;
     public String getName() throws RemoteException;
     public String getImageUrl() throws RemoteException;
+    public String getFormattedProduct() throws RemoteException;
+    public boolean isBorrowed() throws RemoteException;
 }

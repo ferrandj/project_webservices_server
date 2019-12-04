@@ -47,16 +47,16 @@ public class ProductStorageService extends UnicastRemoteObject implements IProdu
         return false;
     }
     @Override
-    public List<IProduct> getProducts(IUser user, String requestedName, long idProductType) throws RemoteException {
+    public List<IProduct> getProducts(IUser user, String requestedName) throws RemoteException {
         ArrayList<IProduct> lst = new ArrayList<>();
         if(isUserAuthenticated(user)){
-            if(validId(idProductType) && validString(requestedName)) {
+            if(validString(requestedName)) {
                 try (Connection con = Database.getConnection();
                      Statement stm = con.createStatement()) {
-                    String constructedRequest = "SELECT * FROM product WHERE name LIKE \"%" + requestedName.toLowerCase() + "%\" AND id_product_type = " + idProductType;
+                    String constructedRequest = "SELECT * FROM product WHERE name LIKE \"%" + requestedName.toLowerCase() + "%\" AND id_product NOT IN (SELECT borrow.id_product FROM borrow WHERE (borrow.state == 1 OR borrow.state == 0) AND borrow.id_user == " + user.getIdUser() + ")";
                     ResultSet res = stm.executeQuery(constructedRequest);
                     while (res.next()) {
-                        Product product = new Product(res.getLong("id_product"), res.getLong("id_product_type"), res.getString("name"), res.getString("image_url"));
+                        Product product = new Product(res.getLong("id_product"), res.getLong("id_product_type"), res.getString("name"), res.getString("image_url"), res.getLong("is_borrowed"));
                         lst.add(product);
                     }
                 } catch (SQLException e) {
@@ -76,7 +76,7 @@ public class ProductStorageService extends UnicastRemoteObject implements IProdu
                     String constructedRequest = "SELECT * FROM product WHERE id_product = " + id_product;
                     ResultSet res = stm.executeQuery(constructedRequest);
                     if (res.next()) {
-                        product = new Product(res.getLong("id_product"), res.getLong("id_product_type"), res.getString("name"), res.getString("image_url"));
+                        product = new Product(res.getLong("id_product"), res.getLong("id_product_type"), res.getString("name"), res.getString("image_url"), res.getLong("is_borrowed"));
                     }
                 } catch (SQLException e) {
                     logger.log(Level.INFO, e.getMessage());

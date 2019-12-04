@@ -36,7 +36,8 @@ public class CommentService extends UnicastRemoteObject implements ICommentServi
                 //regarder si il n'y a pas déja un commentaire idUser / idProduct
                 checkIdOnTable(idUser, mark, stm);
                 //ajouter dans la database
-                String constructedRequest = "INSERT INTO comment (id_user, id_product, username, mark) VALUES(" + idUser + ", " + idProduct + ", '" + user.getUsername() + "', " + mark + " )";
+                String constructedRequest = "INSERT INTO comment (id_user, id_product, username, mark) VALUES("
+                        + idUser + ", " + idProduct + ", '" + user.getUsername() + "', " + mark + " )";
                 stm.executeUpdate(constructedRequest);
             } catch (SQLException e) {
                 e.printStackTrace();
@@ -58,7 +59,9 @@ public class CommentService extends UnicastRemoteObject implements ICommentServi
                     return;
                 }
                 //ajouter dans la database
-                String constructedRequest = "INSERT INTO comment (id_user, id_product, username, mark, description) VALUES(" + idUser + ", " + idProduct + ", '" + user.getUsername() + "', " + mark + ", '" + comment + "')";
+                String constructedRequest = "INSERT INTO comment (id_user, id_product, username, mark, description)"
+                        + "VALUES(" + idUser + ", " + idProduct + ", '" + user.getUsername()
+                        + "', " + mark + ", '" + comment + "')";
                 stm.executeUpdate(constructedRequest);
             } catch (SQLException e) {
                 e.printStackTrace();

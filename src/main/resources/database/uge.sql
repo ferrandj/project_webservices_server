@@ -10,8 +10,10 @@ CREATE TABLE product
     id_product_type integer NOT NULL,
     name            text    NOT NULL,
     image_url       text    NOT NULL,
+    is_borrowed     integer NOT NULL DEFAULT 0,
     price           integer NOT NULL,
     adding_date     Date    NOT NULL DEFAULT (datetime('now', 'localtime')),
+    CONSTRAINT is_borrowed_check CHECK (is_borrowed IN (0, 1)),
     FOREIGN KEY (id_product_type) REFERENCES product_type (id_product_type)
         ON DELETE CASCADE ON UPDATE CASCADE
 );
@@ -118,10 +120,10 @@ INSERT INTO comment (id_product, id_user, username, mark) VALUES (1, 2, "jerem",
 INSERT INTO comment (id_product, id_user, username, mark, description) VALUES (1, 3, "michel", 5, "Parfait pour moi. 20/20 !");
 INSERT INTO comment (id_product, id_user, username, mark) VALUES (3, 2, "jerem", 4);
 
-INSERT INTO product (id_product_type, name, image_url, price) VALUES (1, "T-shirt Star Wars", "https://images-na.ssl-images-amazon.com/images/I/61IpbkO3V8L._UX385_.jpg", 15);
+INSERT INTO product (id_product_type, name, image_url, is_borrowed, price) VALUES (1, "T-shirt Star Wars", "https://images-na.ssl-images-amazon.com/images/I/61IpbkO3V8L._UX385_.jpg", 1, 15);
 INSERT INTO product (id_product_type, name, image_url, price) VALUES (1, "T-shirt mon petit poney", "https://images-na.ssl-images-amazon.com/images/I/911-HNyyETL._UX342_.jpg", 25);
-INSERT INTO product (id_product_type, name, image_url, price) VALUES (1, "T-shirt LOTR", "https://images-na.ssl-images-amazon.com/images/I/61vwjn5nu-L._UX569_.jpg", 10);
-INSERT INTO product (id_product_type, name, image_url, price) VALUES (3, "Zelda", "http://image.jeuxvideo.com/images/ns/z/e/zel1ns0f.jpg", 30);
+INSERT INTO product (id_product_type, name, image_url, is_borrowed, price) VALUES (1, "T-shirt LOTR", "https://images-na.ssl-images-amazon.com/images/I/61vwjn5nu-L._UX569_.jpg", 1, 10);
+INSERT INTO product (id_product_type, name, image_url, is_borrowed,  price) VALUES (3, "Zelda", "http://image.jeuxvideo.com/images/ns/z/e/zel1ns0f.jpg", 1, 30);
 INSERT INTO product (id_product_type, name, image_url, price) VALUES (2, "The Witcher tome 1", "https://images-na.ssl-images-amazon.com/images/I/51gbaCE0GPL._SX307_BO1,204,203,200_.jpg", 20);
 INSERT INTO product (id_product_type, name, image_url, price) VALUES (4, "Bétonnière", "https://www.pointp.fr/asset/30/58/AST2243058-XL.jpg", 150);
 

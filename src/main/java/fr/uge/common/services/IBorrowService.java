@@ -19,5 +19,6 @@ public interface IBorrowService extends Remote {
      * @throws RemoteException remote exception
      */
     void returnProduct(IUser user, long isUser, long idBorrow) throws RemoteException;
+    void cancelBorrow(IUser user, long idUser, long id_product, long idBorrow) throws RemoteException;
     List<IBorrowable> getBorrowedProducts(IUser user, String name) throws RemoteException;
 }
